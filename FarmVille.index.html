@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Offline FarmVille 2D</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f4f1;
+      text-align: center;
+    }
+
+    h1 {
+      color: #6b8e23;
+    }
+
+    #info {
+      padding: 15px;
+    }
+
+    #info button {
+      margin: 5px;
+      padding: 15px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .farm-container {
+      display: grid;
+      grid-template-columns: repeat(5, 80px);
+      gap: 10px;
+      padding: 20px;
+      justify-content: center;
+    }
+
+    .tile {
+      height: 80px;
+      width: 80px;
+      background: #deb887;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .tile.planted {
+      background-color: green;
+    }
+
+    .tile.grown {
+      background-color: yellow;
+    }
+
+    .farmer {
+      width: 50px;
+      height: 50px;
+      background: red;
+      position: absolute;
+      bottom: 0;
+      left: 0;
+    }
+
+    button:hover {
+      background-color: #556b2f;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>FarmVille 2D</h1>
+
+  <div id="info">
+    <p>Coins: <span id="coins">0</span></p>
+    <button onclick="switchMode('plant')">Plant</button>
+    <button onclick="switchMode('harvest')">Harvest</button>
+    <button onclick="addCharacter()">Add Farmer</button>
+  </div>
+
+  <div id="farm-container" class="farm-container"></div>
+
+  <script>
+    const farmContainer = document.getElementById("farm-container");
+    const coinsDisplay = document.getElementById("coins");
+    let coins = 0;
+    let currentMode = "plant";
+
+    function initializeFarm() {
+      for (let i = 0; i < 25; i++) {
+        const tile = document.createElement('div');
+        tile.classList.add('tile');
+        tile.dataset.state = 'empty';
+
+        tile.addEventListener('click', () => interactWithTile(tile));
+
+        farmContainer.appendChild(tile);
+      }
+    }
+
+    function switchMode(mode) {
+      currentMode = mode;
+      alert(`Switched to ${mode} mode!`);
+    }
+
+    function interactWithTile(tile) {
+      const state = tile.dataset.state;
+
+      if (currentMode === 'plant' && state === 'empty') {
+        tile.dataset.state = 'planted';
+        tile.innerHTML = '<span>🌱</span>';
+
+        setTimeout(() => growCrop(tile), 5000);
+      } else if (currentMode === 'harvest' && state === 'grown') {
+        tile.dataset.state = 'empty';
+        tile.innerHTML = '';
+        coins += 10;
+        coinsDisplay.innerText = coins;
+      }
+    }
+
+    function growCrop(tile) {
+      if (tile.dataset.state === 'planted') {
+        tile.dataset.state = 'grown';
+        tile.innerHTML = '<span>🌾</span>';
+      }
+    }
+
+    function addCharacter() {
+      const farmer = document.createElement('div');
+      farmer.className = 'farmer';
+      const randomX = Math.floor(Math.random() * 5) * 80;
+      const randomY = Math.floor(Math.random() * 5) * 80;
+
+      farmer.style.left = randomX + 'px';
+      farmer.style.top = randomY + 'px';
+
+      const farmTiles = document.getElementsByClassName('tile');
+      farmTiles[randomY / 80].appendChild(farmer);
+    }
+
+    // Initialize farm tiles
+    initializeFarm();
+  </script>
+
+</body>
+</html>
+<!-- Save Game Button -->
+<button onclick="saveGame()">Save Game</button>
+
+<script>
+  // Save game state to Local Storage
+  function saveGame() {
+    const tiles = document.getElementsByClassName('tile');
+    const tileStates = Array.from(tiles).map(tile => tile.dataset.state);
+    const coinsData = coins;
+
+    localStorage.setItem('tileStates', JSON.stringify(tileStates));
+    localStorage.setItem('coins', coinsData);
+
+    console.log('Game progress has been saved!');
+    alert('Game saved successfully!');  // Confirmation message
+  }
+</script>
